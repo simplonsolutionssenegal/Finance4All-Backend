@@ -1,22 +1,19 @@
 import mongoose, { Schema } from 'mongoose';
+import { UserRole } from '../../constant/roles';
 import { IUser } from '../interfaces/User.interface';
+import { status } from '../../constant/statut';
 
-const UserSchema: Schema = new Schema<IUser>(
-  {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: {
-      type: String,
-      enum: ['super_admin', 'admin', 'organisation', 'beneficiaire'],
-      required: true,
-    },
-    phone: { type: String },
-    otp: { type: String },
-    otpExpires: { type: Date },
-    isActive: { type: Boolean, default: true },
-  },
-  { timestamps: true },
-);
+const userSchema = new Schema<IUser>({
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  role: { type: String, enum: Object.values(UserRole), required: true },
+  phone: { type: String, required: true },
+  status: { type: String, enum: Object.values(status), default: status.ACTIF },
+  country: { type: Schema.Types.ObjectId, required: true },
+  organisationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organisation', default: null },
+  isAdminOrganisation: { type: Boolean, default: false },
+}, { timestamps: true });
 
-export default mongoose.model<IUser>('User', UserSchema);
+export const UserModel = mongoose.model<IUser>('User', userSchema);

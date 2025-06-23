@@ -1,7 +1,6 @@
-module.exports = {
-    SUPER_ADMIN: 'super_admin',
-    ADMIN: 'admin',
-    ORGANIZATION: 'organization',
-    BENEFICIARY: 'beneficiary',
-  };
-  
+export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  ORGANISATION = 'ORGANISATION',
+  BENEFICIAIRE = 'BENEFICIAIRE'
+}

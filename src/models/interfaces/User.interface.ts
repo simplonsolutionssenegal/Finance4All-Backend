@@ -1,14 +1,19 @@
 import { Document } from 'mongoose';
+import { Types } from 'mongoose';
+import { UserRole } from '../../constant/roles';
+import { status } from '../../constant/statut';
 
 export interface IUser extends Document {
-  name: string;
   email: string;
   password: string;
-  role: 'super_admin' | 'admin' | 'organisation' | 'beneficiaire';
-  phone?: string;
-  otp?: string;
-  otpExpires?: Date;
-  isActive: boolean;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  phone: string;
+  status: status;
+  country: Types.ObjectId;
+  organisationId?: Types.ObjectId;
+  isAdminOrganisation?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

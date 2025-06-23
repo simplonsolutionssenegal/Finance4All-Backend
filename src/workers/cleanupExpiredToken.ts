@@ -1,14 +1,24 @@
-import express, { Request, Response, NextFunction } from 'express';
-const app = express();
-const authRoutes = require('./routes/auth.routes');
+import { TokenModel } from '../models/schemas/token.schema';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
-app.use(express.json());
-app.use('/api/auth', authRoutes);
+dotenv.config();
 
-// Middleware pour la gestion des erreurs
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ message: err.message || 'Erreur serveur' });
-});
+const cleanupExpiredTokens = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI as string);
 
-module.exports = app;
+    const result = await TokenModel.deleteMany({
+      expiresAt: { $lte: new Date() },
+    });
+
+    console.log(`[Worker] ${result.deletedCount} tokens expirés supprimés.`);
+
+    await mongoose.disconnect();
+  } catch (error) {
+    console.error('[Worker] Erreur lors du cleanup des tokens :', error);
+    process.exit(1);
+  }
+};
+
+cleanupExpiredTokens();

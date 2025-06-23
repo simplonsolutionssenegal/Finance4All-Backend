@@ -1,21 +1,48 @@
-import { Request, Response } from 'express';
-import { registerUser, loginUser } from '../services/auth.service';
+import { Request, Response, NextFunction } from 'express';
+import * as AuthService from '../services/auth.service';
+import { loginValidator, forgotPasswordValidator, resetPasswordValidator } from '../models/validators/auth.validator';
 
-export const register = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const { error } = loginValidator.validate(req.body);
+  if (error) {
+    res.status(400).json({ message: error.details[0].message });
+    return;
+  }
+
   try {
-    const user = await registerUser(req.body);
-    res.status(201).json({ message: 'Utilisateur créé avec succès', user });
-  } catch (error) {
-    res.status(400).json({ message: (error as Error).message });
+    const { token, user } = await AuthService.login(req.body.email, req.body.password);
+    res.status(200).json({ token, user });
+  } catch (err: any) {
+    next(err); // on passe l'erreur à ton middleware global errorHandler
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const { error } = forgotPasswordValidator.validate(req.body);
+  if (error) {
+    res.status(400).json({ message: error.details[0].message });
+    return;
+  }
+
   try {
-    const { email, password } = req.body;
-    const { user, token } = await loginUser(email, password);
-    res.json({ message: 'Connexion réussie', user, token });
-  } catch (error) {
-    res.status(400).json({ message: (error as Error).message });
+    await AuthService.forgotPassword(req.body.email);
+    res.status(200).json({ message: 'Lien envoyé avec succès.' });
+  } catch (err: any) {
+    next(err);
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const { error } = resetPasswordValidator.validate(req.body);
+  if (error) {
+    res.status(400).json({ message: error.details[0].message });
+    return;
+  }
+
+  try {
+    await AuthService.resetPassword(req.body.token, req.body.newPassword);
+    res.status(200).json({ message: 'Mot de passe réinitialisé avec succès.' });
+  } catch (err: any) {
+    next(err);
   }
 };
