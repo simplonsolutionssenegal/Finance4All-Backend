@@ -1,21 +1,19 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IOrganisation } from '../interfaces/Organisation.interface';
+import mongoose, { Schema } from 'mongoose';
+import { IOrganisation } from '../interfaces/organisation.interface';
 
-export interface IOrganisationDocument extends Omit<IOrganisation, '_id'>, Document {}
+const organisationSchema = new Schema<IOrganisation>(
+  {
+    name: { type: String, required: true, unique: true },
+    description: { type: String, required: true },
+    logoUrl: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
+    address: { type: String, required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    isActive: { type: Boolean, default: true },
+    country: { type: Schema.Types.ObjectId, ref: 'Country', required: true },
+  },
+  { timestamps: true }
+);
 
-const OrganisationSchema: Schema<IOrganisationDocument> = new Schema({
-  nom: { type: String, required: true, trim: true },
-  description: { type: String },
-  logoUrl: { type: String },
-  siteWeb: { type: String },
-  email: { type: String },
-  telephone: { type: String },
-  adresse: { type: String },
-  createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  isActive: { type: Boolean, default: true },
-  isValidated: { type: Boolean, default: false },
-}, {
-  timestamps: true
-});
-
-export const OrganisationModel = mongoose.model<IOrganisationDocument>('Organisation', OrganisationSchema);
+export const OrganisationModel = mongoose.model<IOrganisation>('Organisation', organisationSchema);
